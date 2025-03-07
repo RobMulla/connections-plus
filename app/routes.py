@@ -1,8 +1,22 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
-from app.models import Puzzle, UserProgress
-from app import db
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    jsonify,
+    redirect,
+    url_for,
+    flash,
+    abort,
+)
 import random
 import json
+from app.utils import (
+    get_puzzle_by_date,
+    get_all_puzzles,
+    format_puzzle_for_display,
+    generate_hint,
+    check_submission,
+)
 
 main_bp = Blueprint("main", __name__)
 
@@ -18,47 +32,45 @@ def puzzle(date):
     """Display a specific puzzle by date."""
     # Handle 'latest' as a special case
     if date == "latest":
-        latest_puzzle = Puzzle.query.order_by(Puzzle.date.desc()).first_or_404()
-        return redirect(
-            url_for("main.puzzle", date=latest_puzzle.date.strftime("%Y-%m-%d"))
-        )
+        latest_puzzle = get_puzzle_by_date("latest")
+        return redirect(url_for("main.puzzle", date=latest_puzzle["date"]))
 
-    # Fetch puzzle from database
-    puzzle = Puzzle.query.filter_by(date=date).first_or_404()
-    return render_template("puzzle.html", puzzle=puzzle)
+    # Fetch puzzle from data file
+    puzzle = get_puzzle_by_date(date)
+    if not puzzle:
+        abort(404)
+
+    # Format puzzle for display
+    formatted_puzzle = format_puzzle_for_display(puzzle)
+    return render_template("puzzle.html", puzzle=formatted_puzzle)
 
 
 @main_bp.route("/puzzles")
 def puzzle_archive():
     """Display archive of all available puzzles."""
-    puzzles = Puzzle.query.order_by(Puzzle.date.desc()).all()
-    return render_template("archive.html", puzzles=puzzles)
+    puzzles = get_all_puzzles()
+    formatted_puzzles = [format_puzzle_for_display(puzzle) for puzzle in puzzles]
+    return render_template("archive.html", puzzles=formatted_puzzles)
 
 
 @main_bp.route("/api/puzzle/<date>")
 def api_puzzle(date):
     """API endpoint to get puzzle data."""
-    # Handle 'latest' as a special case
-    if date == "latest":
-        puzzle = Puzzle.query.order_by(Puzzle.date.desc()).first_or_404()
-    else:
-        puzzle = Puzzle.query.filter_by(date=date).first_or_404()
+    # Fetch puzzle from data file
+    puzzle = get_puzzle_by_date(date)
+    if not puzzle:
+        abort(404)
 
-    # Flatten and shuffle words for the frontend
-    puzzle_dict = puzzle.to_dict()
-    all_words = []
-    for category_words in puzzle_dict["words"]:
-        all_words.extend(category_words)
-
-    random.shuffle(all_words)
+    # Format puzzle for display
+    formatted_puzzle = format_puzzle_for_display(puzzle)
 
     return jsonify(
         {
-            "id": puzzle_dict["id"],
-            "date": puzzle_dict["date"],
-            "title": puzzle_dict["title"],
-            "difficulty": puzzle_dict["difficulty"],
-            "words": all_words,
+            "id": formatted_puzzle["id"],
+            "date": formatted_puzzle["date"],
+            "title": formatted_puzzle["title"],
+            "difficulty": formatted_puzzle["difficulty"],
+            "words": formatted_puzzle["words"],
         }
     )
 
@@ -66,24 +78,21 @@ def api_puzzle(date):
 @main_bp.route("/api/save_progress", methods=["POST"])
 def save_progress():
     """API endpoint to save user progress."""
-    data = request.json
-
-    # For now, we'll just return success without authentication
+    # For now, we'll just return success without saving anything
     return jsonify({"status": "success"})
 
 
 @main_bp.route("/api/hint/<date>", methods=["POST"])
 def get_hint(date):
     """API endpoint to get a hint for a specific puzzle."""
-    puzzle = Puzzle.query.filter_by(date=date).first_or_404()
+    puzzle = get_puzzle_by_date(date)
+    if not puzzle:
+        abort(404)
+
     hint_level = request.json.get("level", "beginner")
 
-    # Load puzzle data
-    categories = json.loads(puzzle.categories)
-    words = json.loads(puzzle.words)
-
     # Generate hint based on level
-    hint = generate_hint(categories, words, hint_level)
+    hint = generate_hint(puzzle, hint_level)
 
     return jsonify({"hint": hint})
 
@@ -91,14 +100,14 @@ def get_hint(date):
 @main_bp.route("/api/submit/<date>", methods=["POST"])
 def submit_answer(date):
     """API endpoint to submit an answer for a puzzle."""
-    puzzle = Puzzle.query.filter_by(date=date).first_or_404()
+    puzzle = get_puzzle_by_date(date)
+    if not puzzle:
+        abort(404)
+
     submission = request.json.get("submission", [])
 
-    # Load correct answers
-    correct_answers = json.loads(puzzle.words)
-
     # Check if submission is correct
-    is_correct = check_submission(submission, correct_answers)
+    is_correct = check_submission(submission, puzzle)
 
     return jsonify(
         {
@@ -114,64 +123,3 @@ def submit_answer(date):
 def about():
     """About page with information about the app."""
     return render_template("about.html")
-
-
-# Helper functions
-def generate_hint(categories, words, level):
-    """Generate a hint based on the hint level."""
-    if level == "beginner":
-        # Give a general hint about one of the categories
-        category_index = random.randint(0, len(categories) - 1)
-        category = categories[category_index]
-
-        beginner_hints = [
-            f"One group contains items related to {category.lower()}.",
-            f"Look for words that could be classified as {category.lower()}.",
-            f"Think about {category.lower()} for one of the groups.",
-            f"One category involves {category.lower()}.",
-        ]
-
-        return random.choice(beginner_hints)
-
-    elif level == "intermediate":
-        # Give a hint about the relationship between words in a category
-        category_index = random.randint(0, len(categories) - 1)
-        category = categories[category_index]
-        category_words = words[category_index]
-
-        intermediate_hints = [
-            f"Look for words that share a common {random.choice(['theme', 'property', 'characteristic'])}.",
-            f"Some words might be related to {category.lower()}, but not in an obvious way.",
-            f"Consider different ways to group '{category_words[0]}' with other words.",
-            f"Think about what '{category_words[0]}' and '{category_words[1]}' have in common.",
-        ]
-
-        return random.choice(intermediate_hints)
-
-    elif level == "advanced":
-        # Give a minimal hint about a specific word
-        category_index = random.randint(0, len(categories) - 1)
-        word_index = random.randint(0, len(words[category_index]) - 1)
-        word = words[category_index][word_index]
-
-        advanced_hints = [
-            f"'{word}' belongs to a group you might not have considered yet.",
-            f"Try to find the group that includes '{word}'.",
-            f"'{word}' is part of a category related to {categories[category_index].lower()}.",
-            f"Focus on '{word}' and think about its properties or characteristics.",
-        ]
-
-        return random.choice(advanced_hints)
-
-    else:
-        return "I'm not sure what kind of hint you're looking for. Try 'beginner', 'intermediate', or 'advanced'."
-
-
-def check_submission(submission, correct_answers):
-    """Check if the submission matches the correct answers."""
-    # Convert both to sets of frozensets for comparison
-    # This allows for different ordering of groups and words within groups
-    submission_sets = set(frozenset(group) for group in submission if group)
-    correct_sets = set(frozenset(group) for group in correct_answers)
-
-    return submission_sets == correct_sets
