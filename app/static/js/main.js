@@ -2,6 +2,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize drag and drop functionality if we're on a puzzle page
     if (document.querySelector('.puzzle-board')) {
         initDragAndDrop();
+        initNoteTaking();
+        initHintSystem();
+        
+        // Load saved state if available
+        loadSavedState();
+        
+        // Add reset and shuffle buttons to the tools section
+        addResetAndShuffleButtons();
     }
 });
 
@@ -383,4 +391,96 @@ function initHintSystem() {
             console.error('Error fetching hint:', error);
         });
     });
+}
+
+// Function to add reset and shuffle buttons
+function addResetAndShuffleButtons() {
+    const toolsSection = document.querySelector('.tools');
+    
+    // Create reset button
+    const resetButton = document.createElement('button');
+    resetButton.id = 'reset-button';
+    resetButton.className = 'btn btn-reset';
+    resetButton.textContent = 'Reset';
+    resetButton.addEventListener('click', resetPuzzle);
+    
+    // Create shuffle button
+    const shuffleButton = document.createElement('button');
+    shuffleButton.id = 'shuffle-button';
+    shuffleButton.className = 'btn btn-shuffle';
+    shuffleButton.textContent = 'Shuffle';
+    shuffleButton.addEventListener('click', shuffleCards);
+    
+    // Add buttons to tools section
+    toolsSection.appendChild(resetButton);
+    toolsSection.appendChild(shuffleButton);
+}
+
+// Function to reset the puzzle
+function resetPuzzle() {
+    if (confirm('Are you sure you want to reset the puzzle? This will clear your progress.')) {
+        // Clear local storage
+        localStorage.removeItem('puzzleState');
+        localStorage.removeItem('puzzleNote');
+        
+        // Reload the page
+        location.reload();
+    }
+}
+
+// Function to shuffle the cards
+function shuffleCards() {
+    const puzzleBoard = document.querySelector('.puzzle-board');
+    const wordCards = document.querySelectorAll('.word-card');
+    
+    // Remove all cards from drop zones and place them back on the board
+    wordCards.forEach(card => {
+        // Reset position and styling
+        card.style.position = 'absolute';
+        
+        // Remove color classes
+        card.classList.remove('yellow', 'green', 'blue', 'purple');
+        
+        // Add to puzzle board
+        puzzleBoard.appendChild(card);
+    });
+    
+    // Get board dimensions
+    const boardRect = puzzleBoard.getBoundingClientRect();
+    const boardWidth = boardRect.width;
+    const boardHeight = boardRect.height;
+    
+    // Calculate grid positions
+    const cardWidth = 130; // Card width + margin
+    const cardHeight = 70; // Card height + margin
+    const cols = Math.floor(boardWidth / cardWidth);
+    const rows = Math.ceil(wordCards.length / cols);
+    
+    // Create array of positions
+    const positions = [];
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (positions.length < wordCards.length) {
+                positions.push({
+                    left: col * cardWidth + 10,
+                    top: row * cardHeight + 10
+                });
+            }
+        }
+    }
+    
+    // Shuffle positions
+    for (let i = positions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [positions[i], positions[j]] = [positions[j], positions[i]];
+    }
+    
+    // Position cards
+    wordCards.forEach((card, index) => {
+        card.style.left = `${positions[index].left}px`;
+        card.style.top = `${positions[index].top}px`;
+    });
+    
+    // Save the new state
+    saveCurrentState();
 } 
