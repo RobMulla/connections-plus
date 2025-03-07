@@ -91,10 +91,19 @@ def get_hint(date):
 
     hint_level = request.json.get("level", "beginner")
 
-    # Generate hint based on level
-    hint = generate_hint(puzzle, hint_level)
-
-    return jsonify({"hint": hint})
+    try:
+        # Generate hint based on level using OpenAI
+        hint = generate_hint(puzzle, hint_level)
+        return jsonify({"hint": hint})
+    except Exception as e:
+        # Log the error and return a fallback hint
+        print(f"Error generating hint: {e}")
+        return jsonify(
+            {
+                "hint": "Sorry, I couldn't generate a hint at the moment. Please try again later.",
+                "error": str(e),
+            }
+        ), 500
 
 
 @main_bp.route("/api/submit/<date>", methods=["POST"])

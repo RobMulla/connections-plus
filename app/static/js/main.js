@@ -55,6 +55,11 @@ function initDragAndDrop() {
     
     // Mouse-based dragging for smoother performance
     function handleMouseDown(e) {
+        // Check if we're clicking on a color dot
+        if (e.target.classList.contains('color-dot')) {
+            return; // Don't start dragging if clicking on a dot
+        }
+        
         // Only handle left mouse button
         if (e.button !== 0) return;
         
@@ -438,8 +443,14 @@ function initHintSystem() {
     
     if (!hintButton || !hintLevelSelect || !hintDisplay) return;
     
-    hintButton.addEventListener('click', () => {
-        const level = hintLevelSelect.value;
+    hintButton.addEventListener('click', function() {
+        // Show loading state
+        hintButton.disabled = true;
+        hintButton.textContent = 'Loading...';
+        hintDisplay.textContent = 'Generating hint...';
+        hintDisplay.classList.remove('hidden');
+        
+        const level = document.getElementById('hint-level').value;
         const puzzleDate = document.querySelector('.puzzle-board').dataset.date;
         
         fetch(`/api/hint/${puzzleDate}`, {
@@ -449,13 +460,23 @@ function initHintSystem() {
             },
             body: JSON.stringify({ level })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             hintDisplay.textContent = data.hint;
-            hintDisplay.classList.remove('hidden');
         })
         .catch(error => {
             console.error('Error fetching hint:', error);
+            hintDisplay.textContent = 'Sorry, there was an error generating a hint. Please try again later.';
+        })
+        .finally(() => {
+            // Reset button state
+            hintButton.disabled = false;
+            hintButton.textContent = 'Get Hint';
         });
     });
 }
