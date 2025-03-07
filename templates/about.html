@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}About Connections Plus{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="about-section">
+        <h1>About Connections Plus</h1>
+        
+        <div class="about-content">
+            <h2>What is Connections Plus?</h2>
+            <p>Connections Plus is an enhanced version of the popular NYT Connections game. It provides a more interactive and user-friendly interface for solving Connections puzzles.</p>
+            
+            <h2>Features</h2>
+            <ul>
+                <li><strong>Drag & Drop Interface:</strong> Move cards anywhere on the screen to visually organize your thoughts</li>
+                <li><strong>Color Coding:</strong> Tag cards with potential category colors without submitting</li>
+                <li><strong>Note-taking:</strong> Draw or type notes directly on the screen</li>
+                <li><strong>Game History:</strong> Play any historic NYT Connections puzzle</li>
+                <li><strong>Submission Management:</strong> Review and submit your final answers - and select the order</li>
+                <li><strong>AI-Powered Hints:</strong> Get subtle clues without spoilers</li>
+            </ul>
+            
+            <h2>How to Play</h2>
+            <ol>
+                <li>Select a puzzle (daily or from archives)</li>
+                <li>Drag cards to organize your thoughts</li>
+                <li>Use color coding to mark potential groups (right-click on cards)</li>
+                <li>Request hints if needed</li>
+                <li>Submit when ready!</li>
+            </ol>
+            
+            <h2>About the Original Game</h2>
+            <p>Connections is a word association game created by the New York Times. The goal is to categorize 16 words into 4 groups of 4 based on their connections.</p>
+            
+            <h2>Contact</h2>
+            <p>For questions, feedback, or support, please contact us at <a href="mailto:support@connectionsplus.example.com">support@connectionsplus.example.com</a>.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-section {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .about-section h1 {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .about-content h2 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: var(--primary);
+    }
+    
+    .about-content ul, .about-content ol {
+        margin-left: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .about-content li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .about-content a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .about-content a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %} 
