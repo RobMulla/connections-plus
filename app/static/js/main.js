@@ -259,17 +259,32 @@ function handleRightClick(e) {
 
 // Function to load saved state
 function loadSavedState() {
-    const savedState = localStorage.getItem('puzzleState');
+    const puzzleBoard = document.querySelector('.puzzle-board');
+    const puzzleDate = puzzleBoard.dataset.date;
+    
+    // Get state specific to this puzzle
+    const savedState = localStorage.getItem(`puzzleState_${puzzleDate}`);
     if (!savedState) return false;
     
     try {
         const state = JSON.parse(savedState);
-        const puzzleBoard = document.querySelector('.puzzle-board');
+        
+        // Verify this state is for the current puzzle
+        if (state.puzzleDate !== puzzleDate) {
+            console.warn('Saved state is for a different puzzle');
+            return false;
+        }
         
         // Process each card in the saved state
         state.cards.forEach(cardState => {
             const card = document.getElementById(cardState.id);
             if (!card) return;
+            
+            // Ensure the card text matches
+            if (card.textContent.trim() !== cardState.text) {
+                console.warn(`Card text mismatch: ${card.textContent.trim()} vs ${cardState.text}`);
+                // Don't return false here, continue with other cards
+            }
             
             // Set position if available
             if (cardState.position && cardState.position.left && cardState.position.top) {
@@ -290,7 +305,7 @@ function loadSavedState() {
         });
         
         // Also load notes if available
-        const savedNote = localStorage.getItem('puzzleNote');
+        const savedNote = localStorage.getItem(`puzzleNote_${puzzleDate}`);
         if (savedNote && document.getElementById('note-text')) {
             document.getElementById('note-text').value = savedNote;
         }
@@ -304,7 +319,9 @@ function loadSavedState() {
 
 // Function to save the current state
 function saveCurrentState() {
+    const puzzleDate = document.querySelector('.puzzle-board').dataset.date;
     const state = {
+        puzzleDate: puzzleDate,
         cards: []
     };
     
@@ -331,8 +348,8 @@ function saveCurrentState() {
         state.cards.push(cardState);
     });
     
-    // Save to localStorage
-    localStorage.setItem('puzzleState', JSON.stringify(state));
+    // Save to localStorage with puzzle date as part of the key
+    localStorage.setItem(`puzzleState_${puzzleDate}`, JSON.stringify(state));
 }
 
 // Initialize note-taking functionality
@@ -344,12 +361,14 @@ function initNoteTaking() {
     
     if (!noteButton || !noteContainer || !noteText || !saveNoteButton) return;
     
+    const puzzleDate = document.querySelector('.puzzle-board').dataset.date;
+    
     // Show/hide note container
     noteButton.addEventListener('click', () => {
         noteContainer.classList.toggle('hidden');
         
         // Load saved note
-        const savedNote = localStorage.getItem('puzzleNote');
+        const savedNote = localStorage.getItem(`puzzleNote_${puzzleDate}`);
         if (savedNote) {
             noteText.value = savedNote;
         }
@@ -357,7 +376,7 @@ function initNoteTaking() {
     
     // Save note
     saveNoteButton.addEventListener('click', () => {
-        localStorage.setItem('puzzleNote', noteText.value);
+        localStorage.setItem(`puzzleNote_${puzzleDate}`, noteText.value);
         noteContainer.classList.add('hidden');
     });
 }
@@ -642,4 +661,18 @@ function prepareSubmission() {
     .catch(error => {
         console.error('Error submitting answer:', error);
     });
+}
+
+// Function to reset the puzzle
+function resetPuzzle() {
+    if (confirm('Are you sure you want to reset the puzzle? This will clear your progress.')) {
+        const puzzleDate = document.querySelector('.puzzle-board').dataset.date;
+        
+        // Clear only this puzzle's state
+        localStorage.removeItem(`puzzleState_${puzzleDate}`);
+        localStorage.removeItem(`puzzleNote_${puzzleDate}`);
+        
+        // Reload the page
+        location.reload();
+    }
 } 

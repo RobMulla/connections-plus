@@ -266,25 +266,29 @@ footer {
     margin: 5px !important;
 }
 
-/* Color coding styles */
+/* Color coding styles - make colors more visible */
 .word-card.yellow {
     border-color: var(--yellow);
     background-color: rgba(249, 211, 66, 0.2);
+    box-shadow: 0 0 0 2px var(--yellow);
 }
 
 .word-card.green {
     border-color: var(--green);
     background-color: rgba(79, 176, 109, 0.2);
+    box-shadow: 0 0 0 2px var(--green);
 }
 
 .word-card.blue {
     border-color: var(--blue);
     background-color: rgba(74, 144, 226, 0.2);
+    box-shadow: 0 0 0 2px var(--blue);
 }
 
 .word-card.purple {
     border-color: var(--purple);
     background-color: rgba(155, 89, 182, 0.2);
+    box-shadow: 0 0 0 2px var(--purple);
 }
 
 /* Improve the tools section for buttons */
