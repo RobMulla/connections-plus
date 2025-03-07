@@ -1,0 +1,267 @@
+/* Base styles */
+:root {
+    --yellow: #f9d342;
+    --green: #4fb06d;
+    --blue: #4a90e2;
+    --purple: #9b59b6;
+    --background: #f8f9fa;
+    --text: #333;
+    --light-text: #666;
+    --border: #ddd;
+    --primary: #4a90e2;
+    --secondary: #6c757d;
+    --success: #4fb06d;
+    --danger: #e74c3c;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text);
+    background-color: var(--background);
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 2.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+/* Navigation */
+header {
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.logo a {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+}
+
+.nav-links li {
+    margin-left: 1.5rem;
+}
+
+.nav-links a {
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: var(--primary);
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #3a80d2;
+}
+
+.btn-secondary {
+    background-color: var(--secondary);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5c6670;
+}
+
+/* Hero section */
+.hero {
+    padding: 4rem 0;
+    text-align: center;
+    background-color: #e9f2fe;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.tagline {
+    font-size: 1.25rem;
+    color: var(--light-text);
+    margin-bottom: 2rem;
+}
+
+.cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Features section */
+.features {
+    padding: 4rem 0;
+    background-color: white;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.feature-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* How to play section */
+.how-to-play {
+    padding: 4rem 0;
+    background-color: #e9f2fe;
+}
+
+.steps {
+    margin-left: 2rem;
+    margin-top: 1.5rem;
+}
+
+.steps li {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+/* Footer */
+footer {
+    background-color: #333;
+    color: white;
+    padding: 2rem 0;
+    text-align: center;
+}
+
+/* Puzzle board */
+.puzzle-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.word-card {
+    background-color: white;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem;
+    text-align: center;
+    font-weight: 600;
+    cursor: move;
+    user-select: none;
+    transition: all 0.2s;
+}
+
+.word-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.word-card.yellow {
+    border-color: var(--yellow);
+    background-color: rgba(249, 211, 66, 0.1);
+}
+
+.word-card.green {
+    border-color: var(--green);
+    background-color: rgba(79, 176, 109, 0.1);
+}
+
+.word-card.blue {
+    border-color: var(--blue);
+    background-color: rgba(74, 144, 226, 0.1);
+}
+
+.word-card.purple {
+    border-color: var(--purple);
+    background-color: rgba(155, 89, 182, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .cta-buttons {
+        flex-direction: column;
+    }
+    
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .puzzle-board {
+        grid-template-columns: repeat(2, 1fr);
+    }
+} 

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Connections Plus - A Better NYT Connections Game{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <h1>Connections Plus</h1>
+        <p class="tagline">A better, more interactive UI for solving the NYT Connections game.</p>
+        <div class="cta-buttons">
+            <a href="{{ url_for('main.puzzle', date='latest') }}" class="btn btn-primary">Play Today's Puzzle</a>
+            <a href="{{ url_for('main.puzzle_archive') }}" class="btn btn-secondary">Browse Archive</a>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <h2>Features</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Drag & Drop Interface</h3>
+                <p>Move cards anywhere on the screen to visually organize your thoughts.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>Color Coding</h3>
+                <p>Tag cards with potential category colors without submitting.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3>Note-taking</h3>
+                <p>Draw or type notes directly on the screen.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>Game History</h3>
+                <p>Play any historic NYT Connections puzzle.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Submission Management</h3>
+                <p>Review and submit your final answers - and select the order.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💡</div>
+                <h3>Smart Assistance</h3>
+                <p>Get subtle clues without spoilers.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="how-to-play">
+    <div class="container">
+        <h2>How to Play</h2>
+        <ol class="steps">
+            <li>Select a puzzle (daily or from archives)</li>
+            <li>Drag cards to organize your thoughts</li>
+            <li>Use color coding to mark potential groups</li>
+            <li>Request hints if needed</li>
+            <li>Submit when ready!</li>
+        </ol>
+    </div>
+</section>
+{% endblock %} 
