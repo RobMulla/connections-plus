@@ -137,45 +137,15 @@
     <div class="puzzle-container">
         <div class="puzzle-header">
             <div class="puzzle-title">{{ puzzle.title }} - {{ puzzle.date }}</div>
-            <div class="puzzle-difficulty difficulty-{{ puzzle.difficulty }}">{{ puzzle.difficulty|title }}</div>
         </div>
         
         <div class="puzzle-board" data-date="{{ puzzle.date }}">
-            <div class="word-grid">
-                {% for word in puzzle.words %}
-                <div class="word-card" id="word-{{ loop.index }}">{{ word }}</div>
-                {% endfor %}
-            </div>
+            {% for word in puzzle.words %}
+            <div class="word-card" id="word-{{ loop.index }}">{{ word }}</div>
+            {% endfor %}
         </div>
         
-        <div class="drop-zones">
-            <div class="drop-zone" id="drop-zone-1">
-                <h3>Group 1</h3>
-            </div>
-            <div class="drop-zone" id="drop-zone-2">
-                <h3>Group 2</h3>
-            </div>
-            <div class="drop-zone" id="drop-zone-3">
-                <h3>Group 3</h3>
-            </div>
-            <div class="drop-zone" id="drop-zone-4">
-                <h3>Group 4</h3>
-            </div>
-        </div>
-        
-        <div class="tools">
-            <button id="note-button" class="btn btn-secondary">Add Notes</button>
-            <div>
-                <select id="hint-level" class="form-select">
-                    <option value="beginner">Beginner Hint</option>
-                    <option value="intermediate">Intermediate Hint</option>
-                    <option value="advanced">Advanced Hint</option>
-                </select>
-                <button id="hint-button" class="btn btn-primary">Get Hint</button>
-            </div>
-            <button id="reset-button" class="btn btn-secondary">Reset</button>
-            <button id="submit-button" class="btn btn-success">Submit</button>
-        </div>
+        <!-- Tools section will be added by JavaScript -->
         
         <div id="note-container" class="note-container hidden">
             <textarea id="note-text" placeholder="Add your notes here..."></textarea>
@@ -183,14 +153,6 @@
         </div>
         
         <div id="hint-display" class="hint-display hidden"></div>
-        
-        <div id="submission-panel" class="submission-panel hidden">
-            <h3>Submit Your Answer</h3>
-            <p>Drag your groups into the correct order before submitting.</p>
-            <div id="submission-groups"></div>
-            <button id="confirm-submit" class="btn btn-success">Confirm Submission</button>
-            <button id="cancel-submit" class="btn btn-secondary">Cancel</button>
-        </div>
     </div>
 </div>
 {% endblock %}

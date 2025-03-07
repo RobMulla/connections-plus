@@ -218,12 +218,13 @@ footer {
 
 /* Puzzle board */
 .puzzle-board {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin: 2rem 0;
-    overflow: hidden;
-    touch-action: none;
+    position: relative;
+    min-height: 400px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    overflow: visible; /* Allow cards to be visible outside the board */
 }
 
 /* Fixed card size styles */
@@ -231,19 +232,14 @@ footer {
     background-color: white;
     border: 2px solid var(--border);
     border-radius: 4px;
-    padding: 0; /* Remove padding to ensure consistent size */
     text-align: center;
     font-weight: 600;
     cursor: move;
     user-select: none;
     
-    /* Fixed dimensions - no flexibility */
-    width: 120px !important; /* Force fixed width */
-    height: 60px !important; /* Force fixed height */
-    min-width: 120px !important;
-    min-height: 60px !important;
-    max-width: 120px !important;
-    max-height: 60px !important;
+    /* Fixed dimensions */
+    width: 120px !important;
+    height: 60px !important;
     
     /* Center text */
     display: flex !important;
@@ -252,18 +248,13 @@ footer {
     
     /* Prevent text overflow */
     overflow: hidden;
-    white-space: nowrap;
     text-overflow: ellipsis;
     
     /* Ensure consistent box model */
     box-sizing: border-box !important;
     
-    /* Smooth transitions for hover/active states */
-    transition: box-shadow 0.2s, transform 0.1s;
-    
-    /* GPU acceleration */
-    transform: translate3d(0, 0, 0);
-    will-change: transform;
+    /* Smooth transitions */
+    transition: box-shadow 0.2s, transform 0.1s, background-color 0.3s;
     
     /* Prevent text selection */
     -webkit-user-select: none;
@@ -275,14 +266,25 @@ footer {
     margin: 5px !important;
 }
 
-/* Ensure cards in drop zones maintain their size */
-.drop-zone .word-card {
-    position: relative !important;
-    left: 0 !important;
-    top: 0 !important;
-    margin: 5px !important;
-    /* Reset any transforms */
-    transform: none !important;
+/* Color coding styles */
+.word-card.yellow {
+    border-color: var(--yellow);
+    background-color: rgba(249, 211, 66, 0.2);
+}
+
+.word-card.green {
+    border-color: var(--green);
+    background-color: rgba(79, 176, 109, 0.2);
+}
+
+.word-card.blue {
+    border-color: var(--blue);
+    background-color: rgba(74, 144, 226, 0.2);
+}
+
+.word-card.purple {
+    border-color: var(--purple);
+    background-color: rgba(155, 89, 182, 0.2);
 }
 
 /* Improve the tools section for buttons */
@@ -290,33 +292,101 @@ footer {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    margin-top: 2rem;
+    margin: 1rem 0;
     justify-content: center;
+    background-color: #e9f2fe;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Style for the new buttons */
-.btn-reset, .btn-shuffle {
-    background-color: var(--secondary);
-    color: white;
+/* Style for buttons */
+.btn {
     padding: 0.75rem 1.5rem;
     border-radius: 4px;
     cursor: pointer;
     font-weight: 600;
     border: none;
     transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
 }
 
-.btn-reset:hover, .btn-shuffle:hover {
-    background-color: #5a6268;
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-secondary {
+    background-color: var(--secondary);
+    color: white;
+}
+
+.btn-success {
+    background-color: var(--success);
+    color: white;
 }
 
 /* Add icons to buttons */
 .btn-reset::before {
-    content: "🔄 ";
+    content: "🔄";
 }
 
 .btn-shuffle::before {
-    content: "🔀 ";
+    content: "🔀";
+}
+
+.btn-hint::before {
+    content: "💡";
+}
+
+.btn-note::before {
+    content: "📝";
+}
+
+.btn-submit::before {
+    content: "✅";
+}
+
+/* Color coding instructions */
+.color-instructions {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.color-sample {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 0 5px;
+    vertical-align: middle;
+}
+
+.color-yellow {
+    background-color: var(--yellow);
+}
+
+.color-green {
+    background-color: var(--green);
+}
+
+.color-blue {
+    background-color: var(--blue);
+}
+
+.color-purple {
+    background-color: var(--purple);
+}
+
+/* Remove drop zones - we won't use them anymore */
+.drop-zones {
+    display: none;
 }
 
 /* Responsive design */
