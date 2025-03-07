@@ -222,6 +222,8 @@ footer {
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     margin: 2rem 0;
+    overflow: hidden;
+    touch-action: none;
 }
 
 .word-card {
@@ -234,6 +236,9 @@ footer {
     cursor: move;
     user-select: none;
     transition: all 0.2s;
+    transform: translate3d(0, 0, 0);
+    will-change: transform, left, top;
+    touch-action: none;
 }
 
 .word-card:hover {
@@ -258,6 +263,13 @@ footer {
 .word-card.purple {
     border-color: var(--purple);
     background-color: rgba(155, 89, 182, 0.1);
+}
+
+.word-card.dragging {
+    opacity: 0.8;
+    cursor: grabbing;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
 }
 
 /* Responsive design */

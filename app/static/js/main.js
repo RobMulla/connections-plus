@@ -10,11 +10,19 @@ function initDragAndDrop() {
     const dropZones = document.querySelectorAll('.drop-zone');
     const puzzleBoard = document.querySelector('.puzzle-board');
     
+    // Performance optimization: Use requestAnimationFrame for smoother animations
+    let draggedElement = null;
+    let offsetX, offsetY;
+    let rafId = null;
+    
     // Initialize draggable elements
     wordCards.forEach(card => {
         card.setAttribute('draggable', 'true');
         
-        // Add event listeners for drag events
+        // Use mousedown/mousemove/mouseup for smoother dragging
+        card.addEventListener('mousedown', handleMouseDown);
+        
+        // Keep the original drag events as fallback for mobile
         card.addEventListener('dragstart', handleDragStart);
         card.addEventListener('dragend', handleDragEnd);
         
@@ -33,66 +41,177 @@ function initDragAndDrop() {
     // Make the entire puzzle board a drop zone
     puzzleBoard.addEventListener('dragover', handleDragOver);
     puzzleBoard.addEventListener('drop', handleDrop);
-}
-
-// Drag event handlers
-function handleDragStart(e) {
-    this.classList.add('dragging');
-    e.dataTransfer.setData('text/plain', this.id);
-    e.dataTransfer.effectAllowed = 'move';
-}
-
-function handleDragEnd(e) {
-    this.classList.remove('dragging');
-}
-
-function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-}
-
-function handleDragEnter(e) {
-    e.preventDefault();
-    this.classList.add('drag-over');
-}
-
-function handleDragLeave(e) {
-    this.classList.remove('drag-over');
-}
-
-function handleDrop(e) {
-    e.preventDefault();
     
-    // Remove drag-over class from all drop zones
-    document.querySelectorAll('.drag-over').forEach(zone => {
-        zone.classList.remove('drag-over');
-    });
-    
-    // Get the dragged element
-    const id = e.dataTransfer.getData('text/plain');
-    const draggedElement = document.getElementById(id);
-    
-    if (!draggedElement) return;
-    
-    // If dropped on a drop zone, append to that zone
-    if (this.classList.contains('drop-zone')) {
-        this.appendChild(draggedElement);
-    } 
-    // If dropped on the puzzle board, position at drop coordinates
-    else if (this.classList.contains('puzzle-board')) {
-        const boardRect = this.getBoundingClientRect();
-        const x = e.clientX - boardRect.left - (draggedElement.offsetWidth / 2);
-        const y = e.clientY - boardRect.top - (draggedElement.offsetHeight / 2);
+    // Mouse-based dragging for smoother performance
+    function handleMouseDown(e) {
+        // Only handle left mouse button
+        if (e.button !== 0) return;
         
+        // Prevent default to avoid text selection
+        e.preventDefault();
+        
+        draggedElement = this;
+        
+        // Calculate the offset of the mouse pointer from the element's top-left corner
+        const rect = draggedElement.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        
+        // Add dragging class
+        draggedElement.classList.add('dragging');
+        
+        // Set position to absolute for free movement
         draggedElement.style.position = 'absolute';
-        draggedElement.style.left = `${x}px`;
-        draggedElement.style.top = `${y}px`;
         
-        this.appendChild(draggedElement);
+        // Move to front
+        draggedElement.style.zIndex = '1000';
+        
+        // Add event listeners for mouse movement and release
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        
+        // Initial position update
+        updateElementPosition(e);
     }
     
-    // Save the current state
-    saveCurrentState();
+    function handleMouseMove(e) {
+        if (!draggedElement) return;
+        
+        // Use requestAnimationFrame for smoother animation
+        if (rafId) {
+            cancelAnimationFrame(rafId);
+        }
+        
+        rafId = requestAnimationFrame(() => {
+            updateElementPosition(e);
+        });
+    }
+    
+    function updateElementPosition(e) {
+        if (!draggedElement) return;
+        
+        const boardRect = puzzleBoard.getBoundingClientRect();
+        
+        // Calculate new position relative to the puzzle board
+        let x = e.clientX - boardRect.left - offsetX;
+        let y = e.clientY - boardRect.top - offsetY;
+        
+        // Keep the element within the puzzle board boundaries
+        x = Math.max(0, Math.min(x, boardRect.width - draggedElement.offsetWidth));
+        y = Math.max(0, Math.min(y, boardRect.height - draggedElement.offsetHeight));
+        
+        draggedElement.style.left = `${x}px`;
+        draggedElement.style.top = `${y}px`;
+    }
+    
+    function handleMouseUp(e) {
+        if (!draggedElement) return;
+        
+        // Check if dropped over a drop zone
+        const dropZone = getDropZoneAtPosition(e.clientX, e.clientY);
+        
+        if (dropZone) {
+            // Append to drop zone
+            dropZone.appendChild(draggedElement);
+            draggedElement.style.position = 'relative';
+            draggedElement.style.left = '0';
+            draggedElement.style.top = '0';
+        } else {
+            // Keep at current position on the board
+            puzzleBoard.appendChild(draggedElement);
+        }
+        
+        // Clean up
+        draggedElement.classList.remove('dragging');
+        draggedElement.style.zIndex = '';
+        draggedElement = null;
+        
+        // Remove event listeners
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        
+        // Cancel any pending animation frame
+        if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+        }
+        
+        // Save the current state
+        saveCurrentState();
+    }
+    
+    function getDropZoneAtPosition(x, y) {
+        for (const zone of dropZones) {
+            const rect = zone.getBoundingClientRect();
+            if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                return zone;
+            }
+        }
+        return null;
+    }
+    
+    // Original drag event handlers (kept for compatibility)
+    function handleDragStart(e) {
+        this.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', this.id);
+        e.dataTransfer.effectAllowed = 'move';
+    }
+    
+    function handleDragEnd(e) {
+        this.classList.remove('dragging');
+    }
+    
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    }
+    
+    function handleDragEnter(e) {
+        e.preventDefault();
+        this.classList.add('drag-over');
+    }
+    
+    function handleDragLeave(e) {
+        this.classList.remove('drag-over');
+    }
+    
+    function handleDrop(e) {
+        e.preventDefault();
+        
+        // Remove drag-over class from all drop zones
+        document.querySelectorAll('.drag-over').forEach(zone => {
+            zone.classList.remove('drag-over');
+        });
+        
+        // Get the dragged element
+        const id = e.dataTransfer.getData('text/plain');
+        const draggedElement = document.getElementById(id);
+        
+        if (!draggedElement) return;
+        
+        // If dropped on a drop zone, append to that zone
+        if (this.classList.contains('drop-zone')) {
+            this.appendChild(draggedElement);
+            draggedElement.style.position = 'relative';
+            draggedElement.style.left = '0';
+            draggedElement.style.top = '0';
+        } 
+        // If dropped on the puzzle board, position at drop coordinates
+        else if (this.classList.contains('puzzle-board')) {
+            const boardRect = this.getBoundingClientRect();
+            const x = e.clientX - boardRect.left - (draggedElement.offsetWidth / 2);
+            const y = e.clientY - boardRect.top - (draggedElement.offsetHeight / 2);
+            
+            draggedElement.style.position = 'absolute';
+            draggedElement.style.left = `${x}px`;
+            draggedElement.style.top = `${y}px`;
+            
+            this.appendChild(draggedElement);
+        }
+        
+        // Save the current state
+        saveCurrentState();
+    }
 }
 
 // Color coding with right-click

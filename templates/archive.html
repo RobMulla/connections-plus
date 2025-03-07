@@ -10,10 +10,9 @@
     <div class="puzzle-grid">
         {% for puzzle in puzzles %}
         <div class="puzzle-card">
-            <div class="puzzle-date">{{ puzzle.date.strftime('%B %d, %Y') }}</div>
+            <div class="puzzle-date">{{ puzzle.date }}</div>
             <div class="puzzle-title">{{ puzzle.title }}</div>
-            <div class="puzzle-difficulty difficulty-{{ puzzle.difficulty }}">{{ puzzle.difficulty|title }}</div>
-            <a href="{{ url_for('main.puzzle', date=puzzle.date.strftime('%Y-%m-%d')) }}" class="btn btn-primary">Play</a>
+            <a href="{{ url_for('main.puzzle', date=puzzle.date) }}" class="btn btn-primary">Play</a>
         </div>
         {% endfor %}
     </div>
@@ -61,35 +60,7 @@
     .puzzle-title {
         font-size: 1.25rem;
         font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-    
-    .puzzle-difficulty {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 600;
         margin-bottom: 1rem;
-    }
-    
-    .difficulty-easy {
-        background-color: #d4edda;
-        color: #155724;
-    }
-    
-    .difficulty-medium {
-        background-color: #fff3cd;
-        color: #856404;
-    }
-    
-    .difficulty-hard {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-    
-    .difficulty-very-hard {
-        background-color: #cce5ff;
     }
 </style>
 {% endblock %} 

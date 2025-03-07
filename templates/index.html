@@ -1,29 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Connections Plus - A Better NYT Connections Game{% endblock %}
+{% block title %}Connections Plus{% endblock %}
 
 {% block content %}
-<section class="hero">
-    <div class="container">
-        <h1>Connections Plus</h1>
-        <p class="tagline">A better, more interactive UI for solving the NYT Connections game.</p>
-        <div class="cta-buttons">
-            <a href="{{ url_for('main.puzzle', date='latest') }}" class="btn btn-primary">Play Today's Puzzle</a>
-            <a href="{{ url_for('main.puzzle_archive') }}" class="btn btn-secondary">Browse Archive</a>
-        </div>
-    </div>
-</section>
-
-<section class="features">
-    <div class="container">
-        <h2>Features</h2>
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🔄</div>
-                <h3>Drag & Drop Interface</h3>
-                <p>Move cards anywhere on the screen to visually organize your thoughts.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎨</div>
-                <h3>Color Coding</h3>
-                <p>Tag cards with potential category 
+<div class="container">
+    <h1>Welcome to Connections Plus</h1>
+    <p>A better way to play the NYT Connections game.</p>
+</div>
+{% endblock %} 

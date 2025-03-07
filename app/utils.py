@@ -51,16 +51,10 @@ def format_puzzle_for_display(puzzle):
     # Shuffle the words
     random.shuffle(all_words)
 
-    # Determine difficulty based on the highest level
-    difficulty_map = {0: "easy", 1: "medium", 2: "hard", 3: "very hard"}
-    max_level = max(answer["level"] for answer in puzzle["answers"])
-    difficulty = difficulty_map.get(max_level, "medium")
-
     return {
         "id": puzzle["id"],
         "date": puzzle["date"],
         "title": f"Connections Puzzle #{puzzle['id']}",
-        "difficulty": difficulty,
         "words": all_words,
         "answers": puzzle["answers"],
     }
