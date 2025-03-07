@@ -31,7 +31,7 @@ function initDragAndDrop() {
     
     // Initialize draggable elements
     wordCards.forEach(card => {
-        card.setAttribute('draggable', 'true');
+        addColorDotsToCard(card);
         
         // Use mousedown/mousemove/mouseup for smoother dragging
         card.addEventListener('mousedown', handleMouseDown);
@@ -39,9 +39,6 @@ function initDragAndDrop() {
         // Keep the original drag events as fallback for mobile
         card.addEventListener('dragstart', handleDragStart);
         card.addEventListener('dragend', handleDragEnd);
-        
-        // Add event listener for color coding with right-click
-        card.addEventListener('contextmenu', handleRightClick);
     });
     
     // Initialize drop zones
@@ -228,33 +225,66 @@ function initDragAndDrop() {
     }
 }
 
-// Color coding with right-click
-function handleRightClick(e) {
-    e.preventDefault();
+// Function to add color selection dots to a card
+function addColorDotsToCard(card) {
+    // Create container for color dots
+    const dotsContainer = document.createElement('div');
+    dotsContainer.className = 'color-dots';
     
-    // Cycle through colors: none -> yellow -> green -> blue -> purple -> none
-    const colors = ['yellow', 'green', 'blue', 'purple'];
+    // Define colors including "none" for removing color
+    const colors = ['yellow', 'green', 'blue', 'purple', 'none'];
     
-    // Remove all color classes first
+    // Create a dot for each color
     colors.forEach(color => {
-        this.classList.remove(color);
+        const dot = document.createElement('div');
+        dot.className = `color-dot ${color}`;
+        dot.setAttribute('data-color', color);
+        
+        // Add click handler for color selection
+        dot.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent card drag
+            
+            // Get current card color
+            const currentColor = colors.find(c => c !== 'none' && card.classList.contains(c));
+            
+            // Remove all color classes
+            colors.forEach(c => {
+                if (c !== 'none') card.classList.remove(c);
+            });
+            
+            // Remove active state from all dots
+            dotsContainer.querySelectorAll('.color-dot').forEach(d => {
+                d.classList.remove('active');
+            });
+            
+            // If clicking the same color or "none", just remove color
+            if (color === currentColor || color === 'none') {
+                // Color removed, no need to add class
+            } else {
+                // Add new color class to card
+                card.classList.add(color);
+                // Add active state to selected dot
+                dot.classList.add('active');
+            }
+            
+            // Save the current state
+            saveCurrentState();
+        });
+        
+        dotsContainer.appendChild(dot);
     });
     
-    // Find current color index
-    let currentColorIndex = -1;
-    for (let i = 0; i < colors.length; i++) {
-        if (this.classList.contains(colors[i])) {
-            currentColorIndex = i;
-            break;
-        }
-    }
+    // Append dots container to card
+    card.appendChild(dotsContainer);
     
-    // Set next color
-    const nextColorIndex = (currentColorIndex + 1) % colors.length;
-    this.classList.add(colors[nextColorIndex]);
-    
-    // Save the current state
-    saveCurrentState();
+    // Set initial active state if card has a color
+    setTimeout(() => {
+        colors.forEach(color => {
+            if (color !== 'none' && card.classList.contains(color)) {
+                dotsContainer.querySelector(`.color-dot.${color}`).classList.add('active');
+            }
+        });
+    }, 0);
 }
 
 // Function to load saved state
@@ -301,6 +331,17 @@ function loadSavedState() {
                     card.classList.remove(color);
                 });
                 card.classList.add(cardState.color);
+                
+                // Update active dot
+                const colorDot = card.querySelector(`.color-dot.${cardState.color}`);
+                if (colorDot) {
+                    // Remove active from all dots
+                    card.querySelectorAll('.color-dot').forEach(dot => {
+                        dot.classList.remove('active');
+                    });
+                    // Add active to the correct dot
+                    colorDot.classList.add('active');
+                }
             }
         });
         
