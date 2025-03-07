@@ -241,30 +241,35 @@ function addColorDotsToCard(card) {
         dot.setAttribute('data-color', color);
         
         // Add click handler for color selection
-        dot.addEventListener('click', (e) => {
+        dot.addEventListener('click', function(e) {
             e.stopPropagation(); // Prevent card drag
+            e.preventDefault(); // Prevent default behavior
             
             // Get current card color
             const currentColor = colors.find(c => c !== 'none' && card.classList.contains(c));
             
-            // Remove all color classes
+            // Remove all color classes from card
             colors.forEach(c => {
                 if (c !== 'none') card.classList.remove(c);
             });
             
             // Remove active state from all dots
-            dotsContainer.querySelectorAll('.color-dot').forEach(d => {
+            card.querySelectorAll('.color-dot').forEach(d => {
                 d.classList.remove('active');
             });
             
             // If clicking the same color or "none", just remove color
             if (color === currentColor || color === 'none') {
                 // Color removed, no need to add class
+                console.log('Color removed from card');
             } else {
                 // Add new color class to card
-                card.classList.add(color);
-                // Add active state to selected dot
-                dot.classList.add('active');
+                if (color !== 'none') {
+                    card.classList.add(color);
+                    // Add active state to selected dot
+                    this.classList.add('active');
+                    console.log(`Card color set to ${color}`);
+                }
             }
             
             // Save the current state
@@ -281,10 +286,13 @@ function addColorDotsToCard(card) {
     setTimeout(() => {
         colors.forEach(color => {
             if (color !== 'none' && card.classList.contains(color)) {
-                dotsContainer.querySelector(`.color-dot.${color}`).classList.add('active');
+                const activeDot = dotsContainer.querySelector(`.color-dot.${color}`);
+                if (activeDot) {
+                    activeDot.classList.add('active');
+                }
             }
         });
-    }, 0);
+    }, 100);
 }
 
 // Function to load saved state
@@ -460,12 +468,13 @@ function addColorInstructions() {
     const instructions = document.createElement('div');
     instructions.className = 'color-instructions';
     instructions.innerHTML = `
-        <p><strong>Right-click</strong> or <strong>long-press</strong> a card to cycle through colors:
+        <p>Click the colored dots on each card to assign them to groups:
         <span class="color-sample color-yellow"></span> Yellow,
         <span class="color-sample color-green"></span> Green,
         <span class="color-sample color-blue"></span> Blue,
         <span class="color-sample color-purple"></span> Purple
         </p>
+        <p>Click the same color again or the white dot to remove the color.</p>
     `;
     
     puzzleContainer.insertBefore(instructions, puzzleBoard.nextSibling);
@@ -583,7 +592,7 @@ function addControlButtons() {
     toolsSection.appendChild(submitButton);
 }
 
-// Function to arrange cards in a 4x4 grid
+// Function to arrange cards in a 4x4 grid and reset colors
 function arrangeCardsInGrid() {
     const puzzleBoard = document.querySelector('.puzzle-board');
     const wordCards = document.querySelectorAll('.word-card');
@@ -593,6 +602,16 @@ function arrangeCardsInGrid() {
         // Reset position and styling
         card.style.position = 'absolute';
         puzzleBoard.appendChild(card);
+        
+        // Clear all color classes
+        ['yellow', 'green', 'blue', 'purple'].forEach(color => {
+            card.classList.remove(color);
+        });
+        
+        // Reset active state on dots
+        card.querySelectorAll('.color-dot').forEach(dot => {
+            dot.classList.remove('active');
+        });
     });
     
     // Get board dimensions

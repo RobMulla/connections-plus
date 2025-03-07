@@ -406,6 +406,7 @@ footer {
     gap: 8px;
     opacity: 0.7;
     transition: opacity 0.2s;
+    z-index: 10; /* Ensure dots are above other elements */
 }
 
 .word-card:hover .color-dots {
@@ -414,12 +415,15 @@ footer {
 
 /* Individual color dot */
 .color-dot {
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     cursor: pointer;
     border: 1px solid rgba(0, 0, 0, 0.2);
     transition: transform 0.1s;
+    box-sizing: content-box; /* Ensure border doesn't affect size */
+    padding: 2px; /* Add padding to increase clickable area */
+    margin: -2px; /* Offset padding to maintain visual size */
 }
 
 .color-dot:hover {
