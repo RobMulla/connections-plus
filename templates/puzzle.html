@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Connections Plus - {{ puzzle.date }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .puzzle-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        padding: 2rem 0;
+    }
+    
+    .puzzle-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .puzzle-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .puzzle-difficulty {
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .difficulty-easy {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .difficulty-medium {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .difficulty-hard {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .difficulty-very-hard {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+    
+    .puzzle-board {
+        position: relative;
+        min-height: 400px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .word-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .drop-zones {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .drop-zone {
+        min-height: 150px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .tools {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .note-container {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .note-container textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        resize: vertical;
+    }
+    
+    .hint-display {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: #e9f2fe;
+        border-radius: 8px;
+        font-style: italic;
+    }
+    
+    .hidden {
+        display: none;
+    }
+    
+    .submission-panel {
+        margin-top: 2rem;
+        padding: 1rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-select {
+        padding: 0.5rem;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="puzzle-container">
+        <div class="puzzle-header">
+            <div class="puzzle-title">{{ puzzle.title }} - {{ puzzle.date }}</div>
+            <div class="puzzle-difficulty difficulty-{{ puzzle.difficulty }}">{{ puzzle.difficulty|title }}</div>
+        </div>
+        
+        <div class="puzzle-board" data-date="{{ puzzle.date }}">
+            <div class="word-grid">
+                {% for word in puzzle.words %}
+                <div class="word-card" id="word-{{ loop.index }}">{{ word }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="drop-zones">
+            <div class="drop-zone" id="drop-zone-1">
+                <h3>Group 1</h3>
+            </div>
+            <div class="drop-zone" id="drop-zone-2">
+                <h3>Group 2</h3>
+            </div>
+            <div class="drop-zone" id="drop-zone-3">
+                <h3>Group 3</h3>
+            </div>
+            <div class="drop-zone" id="drop-zone-4">
+                <h3>Group 4</h3>
+            </div>
+        </div>
+        
+        <div class="tools">
+            <button id="note-button" class="btn btn-secondary">Add Notes</button>
+            <div>
+                <select id="hint-level" class="form-select">
+                    <option value="beginner">Beginner Hint</option>
+                    <option value="intermediate">Intermediate Hint</option>
+                    <option value="advanced">Advanced Hint</option>
+                </select>
+                <button id="hint-button" class="btn btn-primary">Get Hint</button>
+            </div>
+            <button id="reset-button" class="btn btn-secondary">Reset</button>
+            <button id="submit-button" class="btn btn-success">Submit</button>
+        </div>
+        
+        <div id="note-container" class="note-container hidden">
+            <textarea id="note-text" placeholder="Add your notes here..."></textarea>
+            <button id="save-note" class="btn btn-primary">Save Note</button>
+        </div>
+        
+        <div id="hint-display" class="hint-display hidden"></div>
+        
+        <div id="submission-panel" class="submission-panel hidden">
+            <h3>Submit Your Answer</h3>
+            <p>Drag your groups into the correct order before submitting.</p>
+            <div id="submission-groups"></div>
+            <button id="confirm-submit" class="btn btn-success">Confirm Submission</button>
+            <button id="cancel-submit" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initDragAndDrop();
+        initNoteTaking();
+        initHintSystem();
+        
+        // Load saved state if available
+        loadSavedState();
+        
+        // Reset button functionality
+        document.getElementById('reset-button').addEventListener('click', function() {
+            if (confirm('Are you sure you want to reset the puzzle? This will clear your progress.')) {
+                localStorage.removeItem('puzzleState');
+                localStorage.removeItem('puzzleNote');
+                location.reload();
+            }
+        });
+        
+        // Submit button functionality
+        document.getElementById('submit-button').addEventListener('click', function() {
+            const submissionPanel = document.getElementById('submission-panel');
+            submissionPanel.classList.toggle('hidden');
+            
+            // Clone drop zones for submission
+            const submissionGroups = document.getElementById('submission-groups');
+            submissionGroups.innerHTML = '';
+            
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                const clone = zone.cloneNode(true);
+                clone.classList.add('submission-group');
+                submissionGroups.appendChild(clone);
+            });
+        });
+        
+        // Cancel submission
+        document.getElementById('cancel-submit').addEventListener('click', function() {
+            document.getElementById('submission-panel').classList.add('hidden');
+        });
+        
+        // Confirm submission
+        document.getElementById('confirm-submit').addEventListener('click', function() {
+            // Collect submission data
+            const submission = [];
+            document.querySelectorAll('.submission-group').forEach(group => {
+                const words = [];
+                group.querySelectorAll('.word-card').forEach(card => {
+                    words.push(card.textContent.trim());
+                });
+                submission.push(words);
+            });
+            
+            // Send submission to server
+            const puzzleDate = document.querySelector('.puzzle-board').dataset.date;
+            
+            fetch(`/api/submit/${puzzleDate}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ submission })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.correct) {
+                    alert('Congratulations! Your answer is correct!');
+                } else {
+                    alert('Sorry, that\'s not correct. Try again!');
+                }
+                document.getElementById('submission-panel').classList.add('hidden');
+            })
+            .catch(error => {
+                console.error('Error submitting answer:', error);
+            });
+        });
+    });
+</script>
+{% endblock %} 
